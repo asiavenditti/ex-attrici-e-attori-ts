@@ -68,7 +68,6 @@ function isActress(actress: unknown): actress is Actress {
 }
 
 
-
 async function getActress(id: number): Promise<Actress | null> {
 
   try {
@@ -88,3 +87,64 @@ async function getActress(id: number): Promise<Actress | null> {
   }
 }
 
+// Milestone 4
+
+async function getAllActresses(): Promise<Actress[]> {
+
+  try {
+    const response = await fetch(`http://localhost:3333/actresses`)
+    if (!response.ok) {
+      throw new Error(`Errore HTTP ${response.status}`)
+    }
+
+    const dataActresses: unknown = await response.json()
+    if (!(dataActresses instanceof Array)) {
+      throw new Error(`Errore nel formato dei dati`)
+    }
+    const validActresses: Actress[] = dataActresses.filter((isActress))
+    return validActresses
+
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Errore nel recupero delle attrici, ${error}`)
+    } else {
+      console.error('Errore sconosciuto', error)
+    }
+    return []
+  }
+}
+
+// Milestone 5
+async function getActresses(ids: number[]): Promise<(Actress | null)[]> {
+  try {
+    const promises = ids.map((id) => getActress(id))
+    const actresses = await Promise.all(promises)
+    return actresses
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Si è verificato un errore nel recupero degli id`)
+      throw Error
+    } else {
+      console.error(`Si è verificato un errore sconosciuto`)
+    }
+    return []
+  }
+}
+
+// Bonus 1
+
+function createActress(data: Omit<Actress, 'id'>): Actress {
+  return {
+    ...data,
+    id: Math.floor(Math.random() * 1000)
+  }
+}
+
+function updateActress(actress: Actress, updates: Partial<Actress>): Actress {
+  return {
+    ...actress,
+    ...updates,
+    id: actress.id,
+    name: actress.name
+  }
+}
